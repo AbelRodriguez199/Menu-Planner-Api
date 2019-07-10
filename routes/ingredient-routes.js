@@ -59,7 +59,7 @@ router.put('/ingredients/:id', (req, res, next)=>{
 })
 
 // DELETE route => to delete a specific ingredient
-router.delete('/ingredients/:id', (req, res, next)=>{
+router.delete('/categorys/:id/recipes/:id/ingredients/:id', (req, res, next)=>{
 
   if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
     res.status(400).json({ message: 'Specified id is not valid' });
