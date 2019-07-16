@@ -72,6 +72,7 @@ app.use(cors);
 app.use('/api', require('./routes/category-routes'));
 app.use('/api', require('./routes/recipe-routes'));
 app.use('/api', require('./routes/ingredient-routes'));
+app.use('/api', require('./routes/menu-routes'));
 const index = require('./routes/index');
 app.use('/', index);
 
