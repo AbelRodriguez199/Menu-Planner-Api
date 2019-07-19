@@ -1,39 +1,37 @@
-// const User          = require('../models/user-model');
-// const LocalStrategy = require('passport-local').Strategy;
-// const bcrypt        = require('bcryptjs'); // !!!
-// const passport      = require('passport');
+ const User          = require('../models/user-model');
+ const LocalStrategy = require('passport-local').Strategy;
+ const bcrypt        = require('bcryptjs'); // !!!
+ const passport      = require('passport');
 
-// passport.serializeUser((loggedInUser, cb) => {
-//   cb(null, loggedInUser._id);
-// });
+ passport.serializeUser((user, next) => {
+  next(null, user.id);
+});
 
-// passport.deserializeUser((userIdFromSession, cb) => {
-//   User.findById(userIdFromSession, (err, userDocument) => {
-//     if (err) {
-//       cb(err);
-//       return;
-//     }
-//     cb(null, userDocument);
-//   });
-// });
+passport.deserializeUser((id, next) => {
+  User.findById(id)
+    .then(user => next(null, user))
+    .catch(next)
+});
 
-// passport.use(new LocalStrategy((username, password, next) => {
-//   User.findOne({ username }, (err, foundUser) => {
-//     if (err) {
-//       next(err);
-//       return;
-//     }
 
-//     if (!foundUser) {
-//       next(null, false, { message: 'Incorrect username.' });
-//       return;
-//     }
-
-//     if (!bcrypt.compareSync(password, foundUser.password)) {
-//       next(null, false, { message: 'Incorrect password.' });
-//       return;
-//     }
-
-//     next(null, foundUser);
-//   });
-// }));
+passport.use('local-auth', new LocalStrategy({
+  usernameField: 'email',
+  passwordField: 'password'
+}, (email, password, next) => {
+  User.findOne({ email: email })
+    .then(user => {
+      if (!user) {
+        next(null, false, 'Invalid email or password')
+      } else {
+        return user.checkPassword(password)
+          .then(match => {
+            if (!match) {
+              next(null, false, 'Invalid email or password')
+            } else {
+              next(null, user)
+            }
+          })
+      }
+    })
+    .catch(error => next(error))
+}));

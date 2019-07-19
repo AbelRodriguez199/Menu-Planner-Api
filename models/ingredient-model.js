@@ -7,16 +7,16 @@ const ingredientSchema = new Schema({
    name: { 
      type: String, 
      },
-    quantity: { 
+   quantity: { 
      type: Number, 
      min: 1, 
      index: true 
      },
-    measure: {
+   measure: {
     type: String,
     enum: constants.measures
      },
-    recipe: {
+   recipe: {
       type: Schema.Types.ObjectId, ref: 'Recipe'
      }
 });

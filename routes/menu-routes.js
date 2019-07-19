@@ -5,37 +5,50 @@ const Recipe= require('../models/recipe-model');
 const Category = require('../models/category-model');
 
 const router  = express.Router();
-// POST route => tpara crear un nuevo menu
+// POST route => para crear un nuevo menu
 router.post('/menus', (req, res, next)=>{
-  
-    Menu.create({  
-        category: req.body.categoryID,
-        recipe: req.body.recipeID
-    })
-      .then(response => {
-        Category.findByIdAndUpdate(req.body.categoryID, { $push:{ recipes: response._id } })
-          .then(theResponse => {
-              res.json(theResponse);
-          })
-          .catch(err => {
-            res.json(err);
-        })
-      .then(response => {
-          Recipe.findByIdAndUpdate(req.body.recipeID, { $push:{ recipes: response._id } })
-          .then(theResponse => {
-              res.json(theResponse);
-          })
-      })
-      })
+    new Menu(req.body).save()
+      .then(menu => res.json(menu))
       .catch(err => {
         res.json(err);
       })
   })
-// GET route => to get all the categorys
+
+router.post('/random-menu', async (req, res, next) => {
+  const recipes = await Recipe.find()
+
+  const randomRecipe = () => recipes[Math.floor(Math.random()*recipes.length)]
+
+  const menuData = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
+    .reduce((acc, day) => {
+      return {
+        ...acc,
+        [day]: {
+          breakfast: randomRecipe(),
+          lunch: randomRecipe(),
+          dinner: randomRecipe() 
+        }
+      }
+    }, {})
+  
+    const menu = await new Menu(menuData).save()
+
+    res.json(menu)
+})
+
+// GET route => par obtener todos los menus
 router.get('/menus', (req, res, next) => {
-  Category.find().populate('recipes')
-    .then(allTheCategorys => {
-      res.json(allTheCategorys);
+  const query = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
+    .reduce((acc, day) => {
+      return acc
+        .populate(`${day}.breakfast`)
+        .populate(`${day}.lunch`)
+        .populate(`${day}.dinner`)
+    }, Menu.find())
+  
+  query
+    .then(menus => {
+      res.json(menus);
     })
     .catch(err => {
       res.json(err);

@@ -1,6 +1,5 @@
 require('dotenv').config();
 
-
 const cookieParser = require('cookie-parser');
 const express      = require('express');
 const favicon      = require('serve-favicon');
@@ -8,30 +7,13 @@ const mongoose     = require('mongoose');
 const logger       = require('morgan');
 const path         = require('path');
 const createError  = require('http-errors')
+ const session       = require('express-session');
+ const passport      = require('passport');
 
-
-
-// WHEN INTRODUCING USERS DO THIS:
-// INSTALL THESE DEPENDENCIES: passport-local, passport, bcryptjs, express-session
-// AND UN-COMMENT OUT FOLLOWING LINES:
-
-// const session       = require('express-session');
-// const passport      = require('passport');
-require('./configs/db.config')
-// require('./configs/passport');
-// require('./configs/session.config');
+ require('./configs/db.config')
+require('./configs/passport');
 const cors  = require('./configs/cors.config');
-
-// IF YOU STILL DIDN'T, GO TO 'configs/passport.js' AND UN-COMMENT OUT THE WHOLE FILE
-
-/*mongoose
-  .connect('mongodb://localhost/menu-planner-api', {useNewUrlParser: true})
-  .then(x => {
-    console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`)
-  })
-  .catch(err => {
-    console.error('Error connecting to mongo', err)
-  });*/
+//const session = require('./configs/session.config')
 
 const app_name = require('./package.json').name;
 const debug = require('debug')(`${app_name}:${path.basename(__filename).split('.')[0]}`);
@@ -52,16 +34,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
 
 // ADD SESSION SETTINGS HERE:
-app.use((req, res, next) => {
-  res.locals.session = req.user;
-  next();
-})
+app.use(session);
 
 // USE passport.initialize() and passport.session() HERE:
+app.use(passport.initialize());
+app.use(passport.session());
 
-
-// default value for title local
-app.locals.title = 'Express - Generated with IronGenerator';
 
 
 // ADD CORS SETTINGS HERE TO ALLOW CROSS-ORIGIN INTERACTION:
@@ -69,6 +47,8 @@ app.locals.title = 'Express - Generated with IronGenerator';
 app.use(cors);
 
 // ROUTES MIDDLEWARE STARTS HERE:
+const authRouter = require('./routes/auth-routes')
+app.use('/api', authRouter);
 app.use('/api', require('./routes/category-routes'));
 app.use('/api', require('./routes/recipe-routes'));
 app.use('/api', require('./routes/ingredient-routes'));
@@ -87,13 +67,14 @@ app.use((error, req, res, next) => {
 
   if (error instanceof mongoose.Error.ValidationError) {
     res.status(400);
-    data.errors = {}
-    Object.keys(error.errors)
-      .forEach(field => data.errors[field] = error.errors[field].message)
+    for (field of Object.keys(error.errors)) {
+      error.errors[field] = error.errors[field].message
+    }
+    data.errors = error.errors
   } else if (error instanceof mongoose.Error.CastError) {
-    res.status(404);
-    error.message = 'Resource not found';
+    error = createError(404, 'Resource not found')
   }
+
 
   data.message = error.message
   res.json(data);
