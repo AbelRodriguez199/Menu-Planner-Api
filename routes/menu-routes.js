@@ -54,4 +54,27 @@ router.get('/menus', (req, res, next) => {
       res.json(err);
     })
 });
+// GET route => para obtener vista detallada de un menu específico
+router.get('/menus/:id', (req, res, next)=>{
+
+  if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    res.status(400).json({ message: 'Specified id is not valid' });
+    return;
+  }
+  const query = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
+    .reduce((acc, day) => {
+      return acc
+        .populate(`${day}.breakfast`)
+        .populate(`${day}.lunch`)
+        .populate(`${day}.dinner`)
+    }, Menu.findById(req.params.id))
+  
+  query
+    .then(response => {
+      res.status(200).json(response);
+    })
+    .catch(err => {
+      res.json(err);
+    })
+})
   module.exports = router;

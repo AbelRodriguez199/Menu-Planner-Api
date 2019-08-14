@@ -1,4 +1,4 @@
- const mongoose = require('mongoose');
+ /*const mongoose = require('mongoose');
  const bcrypt = require('bcrypt');
  const SALT_WORK_FACTOR = 10;
  const EMAIL_PATTERN = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
@@ -61,3 +61,4 @@
  
  const User = mongoose.model('User', userSchema);
  module.exports = User;
+ */

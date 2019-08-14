@@ -1,4 +1,4 @@
-const createError = require('http-errors');
+/*const createError = require('http-errors');
 const User = require('../models/user-model');
 const passport = require('passport');
 
@@ -45,3 +45,4 @@ module.exports.editProfile = (req, res, next) => {
     .then(user => res.status(201).json(user))
     .catch(next)
 }
+*/

@@ -1,4 +1,4 @@
-const session = require('express-session');
+/*const session = require('express-session');
 const MongoStore = require("connect-mongo")(session);
 const mongoose = require('mongoose');
 
@@ -16,3 +16,4 @@ module.exports = session({
     ttl: 24 * 60 * 60
   })
 });
+*/
